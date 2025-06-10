@@ -20,14 +20,18 @@ else()
                                 posix_time.c posix_thread.c)
 endif()
 
-add_custom_target(update_mappings
-    COMMAND "${CMAKE_COMMAND}" -P "${GLFW_SOURCE_DIR}/CMake/GenerateMappings.cmake" mappings.h.in mappings.h
-    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    COMMENT "Updating gamepad mappings from upstream repository"
-    SOURCES mappings.h.in "${GLFW_SOURCE_DIR}/CMake/GenerateMappings.cmake"
-    VERBATIM)
+if (GLFW_MAPPING)
+    add_custom_target(update_mappings
+        COMMAND "${CMAKE_COMMAND}" -P "${GLFW_SOURCE_DIR}/CMake/GenerateMappings.cmake" mappings.h.in mappings.h
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+        COMMENT "Updating gamepad mappings from upstream repository"
+        SOURCES mappings.h.in "${GLFW_SOURCE_DIR}/CMake/GenerateMappings.cmake"
+        VERBATIM)
 
-set_target_properties(update_mappings PROPERTIES FOLDER "GLFW3")
+    set_target_properties(update_mappings PROPERTIES FOLDER "GLFW3")
+
+    source_group(src FILES mappings.h.in)
+endif()
 
 if (GLFW_BUILD_COCOA)
     enable_language(OBJC)
@@ -361,3 +365,17 @@ if (GLFW_INSTALL)
             LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 endif()
 
+#--------------------------------------------------------------------
+# Define solution tree organization
+#--------------------------------------------------------------------
+
+# Collect all source and header files in the current directory
+file(GLOB GLFW_SRC_FILES "*.c" "*.cpp" "*.mm" "*.m")
+file(GLOB GLFW_HEADER_FILES "*.h" "*.hpp"
+    "${GLFW_SOURCE_DIR}/include/GLFW/glfw3.h"
+    "${GLFW_SOURCE_DIR}/include/GLFW/glfw3native.h"
+)
+
+# Group them in the IDE
+source_group(src FILES ${GLFW_SRC_FILES})
+source_group(include FILES ${GLFW_HEADER_FILES})
